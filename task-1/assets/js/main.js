@@ -5,29 +5,32 @@ const checkbox = document.getElementById("checkbox");
 
 let DEBUG = checkbox.checked;
 
-function updateDebugMode() {
-  if (DEBUG) {
-    canvas.style.display = "block";
-    drawAreas();
-  } else {
-    canvas.style.display = "none";
-  }
+function loadCanvas() {
+  canvas.width = image.clientWidth;
+  canvas.height = image.clientHeight;
+
+  canvas.style.display = DEBUG ? "block" : "none";
+
+  if (DEBUG) drawAreas();
 }
+
 checkbox.addEventListener("change", () => {
   DEBUG = checkbox.checked;
-  updateDebugMode();
+  loadCanvas();
 });
 
-image.onload = () => {
-  canvas.width = image.width;
-  canvas.height = image.height;
+if (image.complete) {
+  loadCanvas();
+} else {
+  image.onload = loadCanvas;
+}
 
-  updateDebugMode();
-};
+window.addEventListener("resize", loadCanvas);
 
 function drawAreas() {
+  if (!canvas.width || !canvas.height) return;
   ctx.clearRect(0, 0, canvas.width, canvas.height);
-  const areas = document.querySelectorAll("area");
+  const areas = document.querySelectorAll('area[shape="poly"]');
 
   areas.forEach((area) => {
     const coords = area.coords.split(",").map(Number);
